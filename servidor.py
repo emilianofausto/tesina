@@ -10,11 +10,14 @@ import h2.events
 from socket import error as SocketError
 import errno
 
+phrase_received = list()
+
 """
 http://python-hyper.org/h2/en/latest/basic-usage.html#connections
 
 Most H2Connection functions take a stream ID: they require you to actively tell the connection which one to use. In this case, as a simple server, we will never need to choose a stream ID ourselves: the client will always choose one for us. That means we will always be able to get the one we need off the events that fire.
 """
+
 
 def send_response(conn, event):
     stream_id = event.stream_id
@@ -36,6 +39,17 @@ def send_response(conn, event):
         data=response_data,
         end_stream=True
     )
+    phrase_received.append(stream_id)
+
+def imprimePhraseReceived(phrase):
+    processedPhrase = "Phrase received: "
+    i = 1
+    for letra in phrase:
+        pLetra = letra % ( i * 1000)
+        if pLetra > 1:
+            processedPhrase += chr(pLetra)
+
+    print processedPhrase
 
 def handle(sock):
     conn = h2.connection.H2Connection(client_side=False)
@@ -62,6 +76,7 @@ def handle(sock):
         if e.errno != errno.ECONNRESET:
             raise
         else:
+            imprimePhraseReceived(phrase_received)
             print "The client closed the connection"
 
 sock = socket.socket()
